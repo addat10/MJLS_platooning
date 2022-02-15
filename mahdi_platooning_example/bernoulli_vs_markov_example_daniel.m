@@ -11,7 +11,7 @@ dir2='100';
 TPM_path=['./connectivity_data_mahdi/MC_probability/',dir1,'/',dir2,'/Transition_Probability.mat']; % First data
 
 %% Define the MJLS
-Kp=0.45:0.05:0.7;
+Kp=0.45:0.01:0.7;
 T=1;
 rho_T_MJLS=zeros(length(Kp),1);
 rho_T_Ber=zeros(length(Kp),1);
@@ -56,7 +56,8 @@ At=diag(ones(n,1))+diag(ones(n-1,1),1); % Always connected
 for i=1:MJLS.N            
     At=update_adjacency(At,i);
     D=diag(At'*ones(n));
-    D(1)=2;                             % Leader externally controlled
+    % Don't need the leader for the consensus problem
+    % D(1)=2; 
     Li=diag(D)-At';
     MJLS.Laps{i}=Li;
     [Ai,Bi]=get_AB(Li,Kp,MJLS.dt);
@@ -72,14 +73,13 @@ MJLS.T=Transition_Probability;
 
 % Find the stationary distribution
 [eig_vecs,~] = eigs(Transition_Probability);
-p_eqm=eig_vecs(:,1);
-%Genetare a random initial distribution
+p_eqm=eig_vecs(:,1)/sum(eig_vecs(:,1)); % Normalize it so that the sum is 1
+%Genetare a random initial distribution but is required only for simulation
 p_ic=rand(64,1);
 MJLS.p_ic=1/sum(p_ic)*p_ic;
 
 Ber=MJLS;
 Ber.T=p_eqm*ones(1,size(p_eqm,1),1);
-
 end
 function At=update_adjacency(At,i)
     vec=dec2bin(i-1,6);
@@ -92,6 +92,8 @@ function At=update_adjacency(At,i)
 end
 function [A,B]=get_AB(L,Kp,T)
 n=size(L,1);
-A=eye(n)-Kp*T*L;
+% Need the projection for the consensus system (marginally stable)
+Proj=(eye(n)-ones(n)/n);
+A=Proj*(eye(n)-Kp*T*L);
 B=T*Kp*L;
 end
