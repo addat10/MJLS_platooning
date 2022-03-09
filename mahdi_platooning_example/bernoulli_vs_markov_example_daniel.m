@@ -11,10 +11,11 @@ dir2='100';
 TPM_path=['./connectivity_data_mahdi/MC_probability/',dir1,'/',dir2,'/Transition_Probability.mat']; % First data
 
 %% Define the MJLS
-Kp=0.45:0.01:0.7;
+Kp=0.45:0.05:0.7;
 T=1;
 rho_T_MJLS=zeros(length(Kp),1);
 rho_T_Ber=zeros(length(Kp),1);
+bound_ber=zeros(length(Kp),1);
 lead_flag=0;% Set to zero for consensus problem and 1 if leader present
 for i=1:length(Kp)
 [MJLS,Ber]=example_ber_vs_markov_first_order_consensus_mahdi_data(TPM_path,Kp(i),T,lead_flag);  
@@ -25,14 +26,16 @@ for i=1:length(Kp)
 % rho_B_Ber=max(abs(eig(B_cal_Ber)));
 rho_T_MJLS(i)=max(abs(eig(T_cal_MJLS)));
 rho_T_Ber(i)=max(abs(eig(T_cal_Ber)));
+bound_ber(i)=norm(T_cal_MJLS-T_cal_Ber);
 end
 
 %% Plots
 figure()
 plot(Kp*T,rho_T_Ber,'r')
 hold on
+plot(Kp*T,rho_T_Ber+bound_ber,'r--')
 plot(Kp*T,rho_T_MJLS,'b')
-legend('Bernoulli','Markov')
+legend('Bernoulli','Markov bound','Markov')
 
 
 %% Analyze probability dynamics
