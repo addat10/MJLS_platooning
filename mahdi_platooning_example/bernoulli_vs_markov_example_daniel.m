@@ -26,14 +26,14 @@ for i=1:length(Kp)
 % rho_B_Ber=max(abs(eig(B_cal_Ber)));
 rho_T_MJLS(i)=max(abs(eig(T_cal_MJLS)));
 rho_T_Ber(i)=max(abs(eig(T_cal_Ber)));
-bound_ber(i)=norm(T_cal_MJLS-T_cal_Ber);
+bound_ber(i)=norm(T_cal_Ber)+norm(T_cal_MJLS-T_cal_Ber);
 end
 
 %% Plots
 figure()
 plot(Kp*T,rho_T_Ber,'r')
 hold on
-plot(Kp*T,rho_T_Ber+bound_ber,'r--')
+plot(Kp*T,bound_ber,'r--')
 plot(Kp*T,rho_T_MJLS,'b')
 legend('Bernoulli','Markov bound','Markov')
 
